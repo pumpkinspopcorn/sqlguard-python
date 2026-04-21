@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SQLGuard for Python - Find SQL Injection Bugs in Your Code</title>
+  <meta name="description" content="An easy-to-use security scanner that checks your Python files for SQL injection bugs and suggests fixes automatically." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <span class="logo-text">SQLGuard</span>
+        <span class="logo-badge">for Python</span>
+      </div>
+      <nav class="header-nav">
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="hero-bg-orb orb-1"></div>
+    <div class="hero-bg-orb orb-2"></div>
+    <div class="hero-bg-orb orb-3"></div>
+    <div class="hero-content">
+      <div class="hero-chip">
+        <span class="chip-dot"></span>
+        Security Scanner for Python Code
+      </div>
+      <h1 class="hero-title">Catch SQL Injection Bugs<br /><span class="gradient-text">Before Attackers Do</span></h1>
+      <p class="hero-subtitle">Upload any <strong>Python (.py)</strong> file and SQLGuard will read through it, point out unsafe database queries, and suggest secure fixes —&nbsp;no security expertise needed.</p>
+      <div class="hero-features">
+        <div class="hero-feature"><span class="hf-icon">🐍</span><span>Made for Python projects</span></div>
+        <div class="hero-feature"><span class="hf-icon">🔍</span><span>Plain‑English explanations</span></div>
+        <div class="hero-feature"><span class="hf-icon">🛠️</span><span>Auto‑generated safe fixes</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== UPLOAD SECTION ===== -->
+  <main id="upload-section" class="main-content">
+
+    <!-- Drop-zone card -->
+    <div class="upload-card" id="upload-card">
+      <div class="drop-zone" id="drop-zone">
+        <input type="file" id="file-input" accept=".py" hidden />
+        <div class="drop-zone-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <p class="drop-zone-text">Drop your <code>.py</code> file here</p>
+        <p class="drop-zone-sub">or</p>
+        <button class="btn btn-primary" id="browse-btn">Browse file</button>
+        <p class="drop-zone-hint">Only Python source files are supported</p>
+      </div>
+
+      <!-- Selected file preview -->
+      <div class="file-preview" id="file-preview" hidden>
+        <div class="file-preview-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+        </div>
+        <div class="file-preview-info">
+          <span class="file-name" id="file-name">file.py</span>
+          <span class="file-size" id="file-size">0 KB</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="clear-btn">✕</button>
+      </div>
+
+      <button class="btn btn-accent btn-lg" id="analyze-btn" disabled>
+        <span class="btn-text">Run Analysis</span>
+        <span class="btn-spinner" hidden>
+          <svg class="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" stroke-opacity="0.3"/>
+            <path d="M12 2a10 10 0 0 1 10 10"/>
+          </svg>
+        </span>
+      </button>
+    </div>
+
+    <!-- Results section (hidden until analysis done) -->
+    <section class="results-section" id="results-section" hidden>
+
+      <!-- Error card -->
+      <div class="error-card" id="error-card" hidden>
+        <div class="error-icon">⚠</div>
+        <div class="error-body">
+          <h3>Analysis Failed</h3>
+          <pre class="error-msg" id="error-msg"></pre>
+        </div>
+      </div>
+
+      <!-- Summary bar -->
+      <div class="summary-bar" id="summary-bar" hidden>
+        <div class="summary-card summary-card--total" id="sc-total">
+          <div class="sc-value" id="sc-total-val">0</div>
+          <div class="sc-label">Vulnerabilities</div>
+        </div>
+        <div class="summary-card summary-card--high" id="sc-high">
+          <div class="sc-value" id="sc-high-val">0</div>
+          <div class="sc-label">High Severity</div>
+        </div>
+        <div class="summary-card summary-card--medium" id="sc-medium">
+          <div class="sc-value" id="sc-medium-val">0</div>
+          <div class="sc-label">Medium Severity</div>
+        </div>
+        <div class="summary-card summary-card--filtered" id="sc-filtered">
+          <div class="sc-value" id="sc-filtered-val">0</div>
+          <div class="sc-label">Filtered Out</div>
+        </div>
+      </div>
+
+      <!-- Vulnerability list -->
+      <div class="vuln-section" id="vuln-section" hidden>
+        <div class="section-header">
+          <h2 class="section-title">Detected Vulnerabilities</h2>
+          <div class="filter-pills" id="filter-pills">
+            <button class="pill pill--active" data-filter="all">All</button>
+            <button class="pill" data-filter="HIGH">High</button>
+            <button class="pill" data-filter="MEDIUM">Medium</button>
+          </div>
+        </div>
+        <div class="vuln-list" id="vuln-list"></div>
+      </div>
+
+      <!-- AI-Generated Fixes Section -->
+      <div class="fixes-section" id="fixes-section" hidden>
+        <div class="section-header">
+          <h2 class="section-title">🤖 AI-Generated Fixes</h2>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="ml-badge" id="ml-badge">ML Model Active</span>
+            <button class="btn btn-ghost btn-sm" id="export-json-btn">Export JSON</button>
+            <button class="btn btn-ghost btn-sm" id="download-fixed-btn">Download Fixed Code</button>
+          </div>
+        </div>
+        <div class="ml-info" id="ml-info" hidden>
+          <div class="ml-info-content">
+            <strong>🧠 ML Model:</strong> <span id="ml-model-type">Loading...</span><br>
+            <strong>📊 Capabilities:</strong> <span id="ml-capabilities">Loading...</span>
+          </div>
+        </div>
+        <div class="fixes-list" id="fixes-list"></div>
+      </div>
+
+      <!-- Code Comparison Section -->
+      <div class="comparison-section" id="comparison-section" hidden>
+        <div class="section-header">
+          <h2 class="section-title">Code Comparison</h2>
+          <div class="comparison-tabs">
+            <button class="tab-btn tab-btn--active" data-tab="original">Original</button>
+            <button class="tab-btn" data-tab="fixed">Fixed</button>
+            <button class="tab-btn" data-tab="diff">Side-by-Side</button>
+          </div>
+        </div>
+        <div class="code-viewer">
+          <div class="code-panel" id="code-original">
+            <pre><code id="code-original-content"></code></pre>
+          </div>
+          <div class="code-panel" id="code-fixed" hidden>
+            <pre><code id="code-fixed-content"></code></pre>
+          </div>
+          <div class="code-diff" id="code-diff" hidden>
+            <div class="diff-pane">
+              <div class="diff-header">Original Code</div>
+              <pre><code id="diff-original-content"></code></pre>
+            </div>
+            <div class="diff-pane">
+              <div class="diff-header">Fixed Code</div>
+              <pre><code id="diff-fixed-content"></code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Symbol table -->
+      <div class="symbol-section" id="symbol-section" hidden>
+        <div class="section-header">
+          <h2 class="section-title">Symbol Table Snapshot</h2>
+          <button class="btn btn-ghost btn-sm" id="toggle-symbol-btn">Collapse</button>
+        </div>
+        <div class="symbol-table-wrap" id="symbol-table-wrap">
+          <table class="symbol-table" id="symbol-table">
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Taint State</th>
+              </tr>
+            </thead>
+            <tbody id="symbol-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-section" id="stats-section" hidden>
+        <div class="section-header">
+          <h2 class="section-title">📈 Analysis Statistics</h2>
+          <span class="stats-badge" id="stats-badge">Detailed Metrics</span>
+        </div>
+        <div class="stats-grid" id="stats-grid"></div>
+      </div>
+
+      <!-- Graphical Dashboard -->
+      <div class="dashboard-section" id="dashboard-section" hidden>
+        <div class="section-header">
+          <h2 class="section-title">📊 Visual Dashboard</h2>
+          <span class="stats-badge">At-a-glance overview</span>
+        </div>
+        <p class="dashboard-intro">
+          A quick visual summary of what we found in your Python file. Hover over any chart to see the exact numbers.
+        </p>
+        <div class="dashboard-grid">
+          <div class="chart-card">
+            <h3 class="chart-title">Vulnerabilities by Severity</h3>
+            <p class="chart-sub">How risky are the issues we found?</p>
+            <div class="chart-wrap"><canvas id="chart-severity"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3 class="chart-title">Variable Safety Status</h3>
+            <p class="chart-sub">Which variables in your code carry untrusted user input?</p>
+            <div class="chart-wrap"><canvas id="chart-taint"></canvas></div>
+          </div>
+          <div class="chart-card chart-card--wide">
+            <h3 class="chart-title">Where Issues Were Found</h3>
+            <p class="chart-sub">Functions / database calls that triggered each warning.</p>
+            <div class="chart-wrap chart-wrap--tall"><canvas id="chart-sinks"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <p>SQLGuard for Python — A friendly SQL injection security scanner</p>
+    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+      Upload your Python file · Get a clear report · Apply suggested fixes
+    </p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
