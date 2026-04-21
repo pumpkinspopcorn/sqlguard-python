@@ -10,10 +10,8 @@ A friendly security scanner that finds SQL injection bugs in Python source files
 
 ## Run locally
 
-\\\ash
 pip install -r requirements.txt
 python app.py
-\\\
 
 Then open http://localhost:5000 in your browser.
 
